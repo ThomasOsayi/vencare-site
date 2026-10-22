@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getSubmissionsRepository, type SubmissionsRepository } from "@/lib/submissions/repository";
 import type { Status, Submission } from "@/lib/submissions/types";
 import { inRange, toCsv } from "@/lib/submissions/utils";
-import Drawer from "./Drawer";
+import SubmissionModal from "./SubmissionModal";
 import Insights from "./Insights";
 import Overview from "./Overview";
 import SubmissionsView, { type Tab } from "./SubmissionsView";
@@ -75,7 +75,31 @@ export default function AdminApp({ userName, email, onSignOut }: Props) {
   }, [base, tab, status, query]);
   const newCount = (items ?? []).filter((s) => s.status === "new").length;
   const openItem = (items ?? []).find((s) => s.id === openId) ?? null;
-  const closeDrawer = useCallback(() => setOpenId(null), []);
+
+  // Prev/next walks the filtered table when browsing Submissions, otherwise all submissions newest first.
+  const navIds = useMemo(() => {
+    const list = view === "submissions" ? rows : [...(items ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const ids = list.map((s) => s.id);
+    return openId && !ids.includes(openId) ? [openId, ...ids] : ids;
+  }, [view, rows, items, openId]);
+  const navIndex = openId ? navIds.indexOf(openId) : -1;
+  const closeModal = useCallback(() => setOpenId(null), []);
+  const goPrev = useCallback(() => navIndex > 0 && setOpenId(navIds[navIndex - 1]), [navIds, navIndex]);
+  const goNext = useCallback(() => navIndex < navIds.length - 1 && setOpenId(navIds[navIndex + 1]), [navIds, navIndex]);
+
+  // Shareable links: /admin#s=<id>. Read once after data first loads, then keep the hash in sync.
+  const hashChecked = useRef(false);
+  useEffect(() => {
+    if (!items || hashChecked.current) return;
+    hashChecked.current = true;
+    const m = location.hash.match(/^#s=(.+)$/);
+    if (m && items.some((s) => s.id === m[1])) setOpenId(m[1]);
+  }, [items]);
+  useEffect(() => {
+    if (!hashChecked.current) return;
+    const target = openId ? `#s=${openId}` : "";
+    if (location.hash !== target) history.replaceState(null, "", `${location.pathname}${location.search}${target}`);
+  }, [openId]);
 
   const exportCsv = () => {
     const blob = new Blob([toCsv(rows)], { type: "text/csv" });
@@ -164,9 +188,14 @@ export default function AdminApp({ userName, email, onSignOut }: Props) {
         </div>
       </div>
 
-      <Drawer
+      <SubmissionModal
         item={openItem}
-        onClose={closeDrawer}
+        index={navIndex}
+        total={navIds.length}
+        now={now}
+        onPrev={goPrev}
+        onNext={goNext}
+        onClose={closeModal}
         onStatus={(id, from, to) => save(repo?.updateStatus(id, from, to, userName), "Status updated")}
         onNote={(id, t) => save(repo?.addNote(id, t, userName), "Note saved")}
         toast={toast}
