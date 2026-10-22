@@ -22,6 +22,20 @@ npm run typecheck
 - `app/api/interest/route.ts` receives form submissions
 - `public/assets/` images (WebP)
 
+## Admin dashboard (`/admin`)
+
+Intake dashboard for form responses: overview (KPIs, weekly volume, follow-up list, lead pipeline),
+a filterable submissions table with a detail drawer (status, internal notes, activity, email), insights per survey question, and CSV export.
+
+- `app/admin/` has its own root layout and `admin.css`, isolated from the marketing site styles, and is `noindex`
+- `components/admin/` UI
+- `lib/submissions/` data model (`types.ts`), helpers, sample data, and `repository.ts`
+
+**Currently runs on sample data and has no login.** The Firebase step:
+1. Add `FirestoreRepository` in `lib/submissions/repository.ts` (`onSnapshot` for `subscribe`, `updateDoc`/`arrayUnion` for status and notes) and return it from `getSubmissionsRepository()`
+2. Write website submissions to the `submissions` collection from `app/api/interest/route.ts` (firebase-admin)
+3. Gate `/admin` with Firebase Auth (Google sign-in) plus an allowlist, and lock Firestore rules to admins
+
 ## Form submissions
 
 The interest form posts to `/api/interest`, which validates and forwards each response as JSON to `FORM_WEBHOOK_URL`
