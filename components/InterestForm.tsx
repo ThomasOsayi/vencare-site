@@ -10,10 +10,10 @@ const SURVEY_LINKS = {
   allergy: "#",
 };
 
-const tabs: { id: Audience; label: string; value: string }[] = [
-  { id: "op", label: "A venue or organization", value: "organization" },
-  { id: "al", label: "An individual", value: "individual" },
-  { id: "in", label: "An insurer or MGA", value: "insurer" },
+const tabs: { id: Audience; label: string; short: string; value: string }[] = [
+  { id: "op", label: "A venue or organization", short: "Venue", value: "organization" },
+  { id: "al", label: "An individual", short: "Individual", value: "individual" },
+  { id: "in", label: "An insurer or MGA", short: "Insurer", value: "insurer" },
 ];
 
 function Select({ label, name, options, full }: { label: string; name: string; options: string[]; full?: boolean }) {
@@ -207,7 +207,8 @@ export default function InterestForm() {
                   <span className="thumb" aria-hidden="true" style={{ transform: `translateX(${idx * 100}%)` }} />
                   {tabs.map((t) => (
                     <button key={t.id} type="button" aria-pressed={audience === t.id} onClick={() => setAudience(t.id)}>
-                      {t.label}
+                      <span className="full">{t.label}</span>
+                      <span className="short">{t.short}</span>
                     </button>
                   ))}
                 </div>

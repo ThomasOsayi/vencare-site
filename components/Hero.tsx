@@ -7,21 +7,24 @@ import { Arrow, SmallCheck, barWidth, delay } from "./icons";
 
 type HeroKey = "venue" | "guest" | "insurer";
 
-const copy: Record<HeroKey, { label: string; lede: string; cta: string; aud: Audience }> = {
+const copy: Record<HeroKey, { label: string; short: string; lede: string; cta: string; aud: Audience }> = {
   venue: {
     label: "Venue",
+    short: "Venue",
     lede: "A wall-mounted epinephrine station for your restaurant or venue, kept stocked, in date, and ready for your staff. One subscription, nothing to manage.",
     cta: "Bring VenCare to your venue",
     aud: "op",
   },
   guest: {
     label: "Guest with allergies",
+    short: "Guest",
     lede: "Imagine knowing, before you sit down, that help is on the wall. VenCare puts epinephrine where you eat, so a forgotten pen isn't the end of the story.",
     cta: "Tell us what would help",
     aud: "al",
   },
   insurer: {
     label: "Insurer",
+    short: "Insurer",
     lede: "A documented, auditable allergy response program for the restaurants you cover. Real loss control your accounts can stand behind.",
     cta: "Talk to us about a pilot",
     aud: "in",
@@ -56,7 +59,8 @@ export default function Hero() {
             <span className="aud-label">I&apos;m a</span>
             {(Object.keys(copy) as HeroKey[]).map((k) => (
               <button key={k} type="button" aria-pressed={key === k} onClick={() => pick(k)}>
-                {copy[k].label}
+                <span className="full">{copy[k].label}</span>
+                <span className="short">{copy[k].short}</span>
               </button>
             ))}
           </div>
