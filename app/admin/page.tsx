@@ -1,5 +1,5 @@
-import AdminApp from "@/components/admin/AdminApp";
+import AdminGate from "@/components/admin/AdminGate";
 
 export default function AdminPage() {
-  return <AdminApp />;
+  return <AdminGate />;
 }

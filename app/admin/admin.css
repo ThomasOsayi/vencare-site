@@ -194,3 +194,13 @@ button.li:first-child{border-top:none}
 .btn.primary{color:var(--navy)}
 .col .tip{position:absolute}
 @media (max-width:820px){.col:nth-child(odd) .x{display:none}.plot{gap:6px}}
+.side-foot .who{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-foot small{overflow:hidden;text-overflow:ellipsis}
+.signout{margin-left:auto;width:32px;height:32px;flex:none;border:none;border-radius:8px;background:transparent;color:#B9C6DA;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.signout:hover{background:rgba(255,255,255,.08);color:#fff}
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(800px 400px at 50% 0%,#E7EFFC,transparent),var(--bg)}
+.gate-card{width:min(400px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:36px 32px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px}
+.gate-card h1{font-family:var(--serif);font-weight:400;font-size:30px;color:var(--navy)}
+.gate-card p{margin:0;color:var(--muted)}
+.gate-btn{width:100%;justify-content:center;min-height:48px;margin-top:6px}
+.gate-err{color:#C2410C!important;font-size:13px}

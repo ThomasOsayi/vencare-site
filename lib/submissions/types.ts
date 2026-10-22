@@ -46,6 +46,7 @@ export const STATUS_LABEL: Record<Status, string> = {
 };
 
 export const ANSWER_LABEL: Record<string, string> = {
+  org_name: "Organization",
   org_type: "Organization type",
   locations: "Locations",
   has_approach: "Clear approach today?",
@@ -58,6 +59,7 @@ export const ANSWER_LABEL: Record<string, string> = {
   matters_most: "Matters most",
   ready_sign: "VenCare Ready sign would influence choice?",
   help_most: "Wants help with",
+  ins_company: "Company",
   ins_book: "Restaurant accounts in book",
   ins_interest: "Interested in",
   ins_role: "Role",

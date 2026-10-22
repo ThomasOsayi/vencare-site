@@ -31,21 +31,35 @@ a filterable submissions table with a detail drawer (status, internal notes, act
 - `components/admin/` UI
 - `lib/submissions/` data model (`types.ts`), helpers, sample data, and `repository.ts`
 
-**Currently runs on sample data and has no login.** The Firebase step:
-1. Add `FirestoreRepository` in `lib/submissions/repository.ts` (`onSnapshot` for `subscribe`, `updateDoc`/`arrayUnion` for status and notes) and return it from `getSubmissionsRepository()`
-2. Write website submissions to the `submissions` collection from `app/api/interest/route.ts` (firebase-admin)
-3. Gate `/admin` with Firebase Auth (Google sign-in) plus an allowlist, and lock Firestore rules to admins
+### Firebase (project `vencare-c1826`)
+
+- **Auth:** Google sign-in. Access is limited to emails listed in the Firestore `admins` collection (doc id = lowercased email).
+  Add people in the Firebase console (Firestore > `admins` > Add document) or with `node --env-file=.env.local scripts/add-admin.mjs person@example.com` (needs a service account).
+- **Data:** website submissions land in `submissions`. `/api/interest` writes them with the web SDK (rules only allow a well-formed new
+  submission, and nobody but admins can read them). If `FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY` are set it uses the Admin SDK instead.
+- **Rules:** `firestore.rules` (published in the console). Admins can only change `status`, `notes`, `updatedAt`.
+- **Config:** the public web config is in `lib/firebase/config.ts`; `NEXT_PUBLIC_FIREBASE_*` env vars override it.
+- **After deploying:** add the Vercel domain under Firebase console > Authentication > Settings > Authorized domains, or Google sign-in will be blocked there.
+
+### Testing against the emulators
+
+```bash
+npx firebase emulators:start --only auth,firestore --project demo-vencare
+NEXT_PUBLIC_FIREBASE_API_KEY=demo NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-vencare NEXT_PUBLIC_FIREBASE_EMULATORS=1 npm run build && npm start
+APP_URL=http://localhost:3000 node scripts/emulator-test.mjs   # API + security rules checks
+```
+In emulator builds, `window.__testSignIn(email)` signs in without the Google popup.
 
 ## Form submissions
 
-The interest form posts to `/api/interest`, which validates and forwards each response as JSON to `FORM_WEBHOOK_URL`
+The interest form posts to `/api/interest`, which validates each response, saves it to Firestore, and optionally forwards it as JSON to `FORM_WEBHOOK_URL`
 (set it in Vercel > Project > Settings > Environment Variables). Point it at the same sheet or tool the standalone surveys use
 (Google Apps Script web app, Zapier/Make webhook, etc.). Each submission includes `audience`: `organization`, `individual` or `insurer`.
-Without the env var, submissions are logged to the Vercel runtime logs.
 
 ## Before launch
 
-- [ ] Set `FORM_WEBHOOK_URL`
+- [ ] Add the Vercel domain to Firebase Auth authorized domains
+- [ ] (Optional) Set `FORM_WEBHOOK_URL` to also send responses to the survey sheet
 - [ ] Add the two full-survey links (`SURVEY_LINKS` in `components/InterestForm.tsx`)
 - [ ] Replace `[PRICE]` placeholders
 - [ ] Confirm the legal FAQ answer with counsel

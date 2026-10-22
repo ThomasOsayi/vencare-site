@@ -7,7 +7,7 @@ import { shortDate } from "@/lib/submissions/utils";
 type Props = {
   item: Submission | null;
   onClose: () => void;
-  onStatus: (id: string, s: Status) => void;
+  onStatus: (id: string, from: Status, to: Status) => void;
   onNote: (id: string, text: string) => void;
   toast: (t: string) => void;
 };
@@ -49,7 +49,7 @@ export default function Drawer({ item, onClose, onStatus, onNote, toast }: Props
               <div className="dr-sec">
                 <h3>Status</h3>
                 <div className="row">
-                  <select className="sel" aria-label="Status" value={item.status} onChange={(e) => { onStatus(item.id, e.target.value as Status); toast("Status updated"); }}>
+                  <select className="sel" aria-label="Status" value={item.status} onChange={(e) => onStatus(item.id, item.status, e.target.value as Status)}>
                     {(Object.keys(STATUS_LABEL) as Status[]).map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
                   </select>
                   <span className="q-n">Received {new Date(item.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
@@ -67,7 +67,7 @@ export default function Drawer({ item, onClose, onStatus, onNote, toast }: Props
                 <h3>Internal note</h3>
                 <textarea className="note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a note for the team..." aria-label="Internal note" />
                 <div className="row" style={{ marginTop: 8 }}>
-                  <button className="btn" type="button" disabled={!note.trim()} onClick={() => { onNote(item.id, note); setNote(""); toast("Note saved"); }}>Save note</button>
+                  <button className="btn" type="button" disabled={!note.trim()} onClick={() => { onNote(item.id, note); setNote(""); }}>Save note</button>
                 </div>
               </div>
               <div className="dr-sec">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getSubmissionsRepository } from "@/lib/submissions/repository";
+import { getSubmissionsRepository, type SubmissionsRepository } from "@/lib/submissions/repository";
 import type { Status, Submission } from "@/lib/submissions/types";
 import { inRange, toCsv } from "@/lib/submissions/utils";
 import Drawer from "./Drawer";
@@ -28,11 +28,10 @@ const VIEWS: { id: View; label: string; icon: React.ReactNode }[] = [
   },
 ];
 const RANGES = [7, 30, 90, 0];
-// Firebase step: replace with the signed-in user's display name.
-const CURRENT_USER = "Thomas";
+type Props = { userName: string; email?: string; onSignOut?: () => void };
 
-export default function AdminApp() {
-  const repo = useMemo(() => getSubmissionsRepository(), []);
+export default function AdminApp({ userName, email, onSignOut }: Props) {
+  const [repo, setRepo] = useState<SubmissionsRepository | null>(null);
   const [items, setItems] = useState<Submission[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<View>("overview");
@@ -45,7 +44,14 @@ export default function AdminApp() {
   const [now, setNow] = useState(() => Date.now());
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => repo.subscribe(setItems, (e) => setError(e.message)), [repo]);
+  useEffect(() => {
+    let alive = true;
+    getSubmissionsRepository().then((r) => alive && setRepo(r));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  useEffect(() => (repo ? repo.subscribe(setItems, (e) => setError(e.message)) : undefined), [repo]);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);
@@ -56,6 +62,9 @@ export default function AdminApp() {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToastMsg(null), 1800);
   }, []);
+
+  const save = (p: Promise<void> | undefined, ok: string) =>
+    p?.then(() => toast(ok)).catch((e: Error) => toast(`Couldn't save: ${e.message}`));
 
   const base = useMemo(() => (items ?? []).filter((s) => inRange(s, range, now)), [items, range, now]);
   const rows = useMemo(() => {
@@ -97,8 +106,13 @@ export default function AdminApp() {
           ))}
         </nav>
         <div className="side-foot">
-          <div className="av">{CURRENT_USER.slice(0, 2).toUpperCase()}</div>
-          <div>{CURRENT_USER}<small>{repo.isSample ? "Sample mode" : "Signed in"}</small></div>
+          <div className="av">{userName.slice(0, 2).toUpperCase()}</div>
+          <div className="who">{userName}<small>{repo?.isSample ? "Sample mode" : email ?? "Signed in"}</small></div>
+          {onSignOut && (
+            <button type="button" className="signout" onClick={onSignOut} aria-label="Sign out" title="Sign out">
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2.5H3.5a1 1 0 00-1 1v9a1 1 0 001 1H6M10.5 11l3-3-3-3M13.5 8H6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+          )}
         </div>
       </aside>
 
@@ -130,7 +144,7 @@ export default function AdminApp() {
         </div>
 
         <div className="content">
-          {repo.isSample && (
+          {repo?.isSample && (
             <div className="banner" role="note">
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5" fill="none" /><path d="M9 5.5v4M9 12.2v.3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
               Showing sample data. Live submissions will appear here once the form is connected to Firebase.
@@ -153,8 +167,8 @@ export default function AdminApp() {
       <Drawer
         item={openItem}
         onClose={closeDrawer}
-        onStatus={(id, s) => repo.updateStatus(id, s, CURRENT_USER)}
-        onNote={(id, t) => repo.addNote(id, t, CURRENT_USER)}
+        onStatus={(id, from, to) => save(repo?.updateStatus(id, from, to, userName), "Status updated")}
+        onNote={(id, t) => save(repo?.addNote(id, t, userName), "Note saved")}
         toast={toast}
       />
       <div className={`toast${toastMsg ? " on" : ""}`} role="status">{toastMsg}</div>
