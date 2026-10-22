@@ -15,7 +15,7 @@ npm run typecheck
 
 ## Structure
 
-- `app/page.tsx` composes the homepage sections
+- `app/(site)/` marketing site (`page.tsx` composes the homepage sections)
 - `app/globals.css` design system (brand tokens, layout, motion). Tailwind v4 is installed for utilities.
 - `components/` sections (`Hero`, `EmergencySequence`, `Sections`, `Faq`, `InterestForm`, `Header`)
 - `components/AudienceContext.tsx` shares the selected audience (venue / individual / insurer) between the hero CTA, insurer CTA and the form
