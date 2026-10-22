@@ -375,6 +375,9 @@ footer{background:var(--navy-deep);color:var(--on-navy-2)}
 .foot .links a{color:#fff;text-decoration:none;transition:color .2s}
 .foot .links a:hover{color:var(--gold)}
 .foot-bottom{border-top:1px solid var(--navy-line);padding:20px 24px 28px;font-size:13px}
+.foot-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px 32px;flex-wrap:wrap}
+.team-login{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--navy-line);border-radius:999px;color:var(--on-navy-2);text-decoration:none;font-weight:500;white-space:nowrap;transition:color .2s,border-color .2s,background-color .2s}
+.team-login:hover{color:#fff;border-color:#4A6797;background:rgba(255,255,255,.05)}
 
 /* reveal */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:var(--d,0s)}
